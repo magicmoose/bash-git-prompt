@@ -280,10 +280,10 @@ function git_prompt_config() {
   if [[ "${GIT_PROMPT_ONLY_IN_REPO:-0}" == 1 ]]; then
     EMPTY_PROMPT="${OLD_GITPROMPT}"
   elif [[ "${GIT_PROMPT_WITH_VIRTUAL_ENV:-1}" == 1 ]]; then
-    local ps="$(gp_add_virtualenv_to_prompt)${PROMPT_START}$(${prompt_callback})${PROMPT_END}"
+    local ps="$(gp_add_virtualenv_to_prompt)${PROMPT_START}$(gp_add_plugindata_to_prompt)$(${prompt_callback})${PROMPT_END}"
     EMPTY_PROMPT="${ps//_LAST_COMMAND_INDICATOR_/${LAST_COMMAND_INDICATOR}}"
   else
-    local ps="${PROMPT_START}$(${prompt_callback})${PROMPT_END}"
+    local ps="${PROMPT_START}$(gp_add_plugindata_to_prompt)$(${prompt_callback})${PROMPT_END}"
     EMPTY_PROMPT="${ps//_LAST_COMMAND_INDICATOR_/${LAST_COMMAND_INDICATOR}}"
   fi
 
@@ -591,7 +591,7 @@ function updatePrompt() {
     fi
     __add_status        "${ResetColor}${GIT_PROMPT_SUFFIX}"
     
-    NEW_PROMPT="$(gp_add_virtualenv_to_prompt)${PROMPT_START}$(${prompt_callback})${STATUS_PREFIX}${STATUS}${PROMPT_END}"
+    NEW_PROMPT="$(gp_add_virtualenv_to_prompt)${PROMPT_START}$(gp_add_plugindata_to_prompt)$(${prompt_callback})${STATUS_PREFIX}${STATUS}${PROMPT_END}"
   else
     NEW_PROMPT="${EMPTY_PROMPT}"
   fi
@@ -600,6 +600,14 @@ function updatePrompt() {
   command rm "${GIT_INDEX_PRIVATE}" 2>/dev/null
 }
 
+# Helper function to add arbitrary plugin data to prompt
+function gp_add_plugindata_to_prompt {
+  local ACCUMULATED_PLUGIN_PROMPT=""
+  if [ -n "$(LC_ALL=C type -t gp_plugin_data)" ] && [ "$(LC_ALL=C type -t gp_plugin_data)" = function ]; 
+    then ACCUMULATED_PLUGIN_PROMPT=$(gp_plugin_data)
+  fi
+  echo "${ACCUMULATED_PLUGIN_PROMPT}"
+}
 # Helper function that returns virtual env information to be set in prompt
 # Honors virtualenvs own setting VIRTUAL_ENV_DISABLE_PROMPT
 function gp_add_virtualenv_to_prompt {

@@ -145,7 +145,10 @@ cp gitprompt.fish ~/.config/fish/functions/fish_prompt.fish
 ### All configs for .bashrc
 
 ```sh
-
+   # Allows setting an arbitrary value in the prompt by writing the gp_plugin_data function
+   function gp_plugin_data {
+    echo $(kube_ps1)
+   }
    # Set config variables first
    GIT_PROMPT_ONLY_IN_REPO=1
 
